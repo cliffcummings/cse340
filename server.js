@@ -6,14 +6,64 @@
  * Require Statements
  *************************/
 const express = require("express")
+const expressLayouts = require("express-ejs-layouts")
 const env = require("dotenv").config()
+
+// NEW - TBD - Moved to routes/static.js
+// const router = express.Router()
+// router.use(express.static("public"))
+// END - TBD
+
 const app = express()
+// Exported from routes/static
 const static = require("./routes/static")
+
+const baseController = require("./controllers/baseController")
+const inventoryRoute = require("./routes/inventoryRoute")
+const Util = require("./utilities")
+const utilities = require("./utilities/")
+
+app.use(static)
+
+/* ***********************
+ * View Engine and Templates
+ *************************/
+app.set("view engine", "ejs")
+app.use(expressLayouts)
+app.set("layout", "./layouts/layout") // not at views root
+
+app.get('/', utilities.handleErrors(baseController.buildHome));
 
 /* ***********************
  * Routes
  *************************/
-app.use(static)
+// app.use(static)
+// Index route
+app.get("/", utilities.handleErrors(baseController.buildHome))
+// Inventory routes - uses inventoryRoute.js file
+app.use("/inv", inventoryRoute)
+//--------------------------------------------------
+// File Not Found Route - must be last route in list
+//--------------------------------------------------
+app.use(async (req, res, next) => {
+  next({status: 404, message: 'Sorry, we appear to have REALLY LOST that page.'})
+})
+
+/* ************************
+ * Express Error Handler
+ * Place after all other middleware
+ *************************/ 
+app.use(async (err, req, res, next) => {
+  let nav = await utilities.getNav()
+  console.error(`Error at: "${req.originalUrl}": ${err.message}`)
+  if(err.status == 404){message = err.message}
+  else {message = 'Oh no! There was a crash. Maybe try a different route?'}
+  res.render("errors/error", {
+    title: err.status || 'Server Error',
+    message,
+    nav
+  })
+})
 
 /* ***********************
  * Local Server Information
@@ -28,3 +78,11 @@ const host = process.env.HOST
 app.listen(port, () => {
   console.log(`app listening on ${host}:${port}`)
 })
+
+//---------------------------------------------------------------------------------
+// Class Notes:
+// In a small application all routes could be written in the main file (server.js).
+// However, as applications grow larger and more complex, the routes for a specific
+// type of interaction are broken out into their own files. 
+// These specific route files will be stored in the routes directory.
+//---------------------------------------------------------------------------------
