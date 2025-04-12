@@ -8,36 +8,34 @@
 const express = require("express")
 const expressLayouts = require("express-ejs-layouts")
 const env = require("dotenv").config()
+const app = express()
 
-// NEW - TBD - Moved to routes/static.js
+// TODO - DELETE - Move to routes/static.js
 // const router = express.Router()
 // router.use(express.static("public"))
-// END - TBD
+// END - TODO - DELETE
 
-const app = express()
 // Exported from routes/static
 const static = require("./routes/static")
+app.use(static)
 
 const baseController = require("./controllers/baseController")
 const inventoryRoute = require("./routes/inventoryRoute")
 const Util = require("./utilities")
 const utilities = require("./utilities/")
 
-app.use(static)
-
 /* ***********************
  * View Engine and Templates
  *************************/
 app.set("view engine", "ejs")
+// expressLayouts directs all res.render (rendering) commands
+// to start looking in the views/layouts directory
 app.use(expressLayouts)
 app.set("layout", "./layouts/layout") // not at views root
-
-app.get('/', utilities.handleErrors(baseController.buildHome));
 
 /* ***********************
  * Routes
  *************************/
-// app.use(static)
 // Index route
 app.get("/", utilities.handleErrors(baseController.buildHome))
 // Inventory routes - uses inventoryRoute.js file

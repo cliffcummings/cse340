@@ -3,7 +3,7 @@ CREATE TYPE public.account_type AS ENUM
 
 ALTER TYPE public.account_type
     -- OWNER TO cse340_cec;
-    OWNER TO cse340_db4;
+    OWNER TO cse340_db5;
 
 -- Table structure for table 'classification'
 CREATE TABLE public.classification (
